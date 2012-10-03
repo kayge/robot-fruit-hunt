@@ -32,7 +32,7 @@ function new_game() {
       }
    };
 
-   id_tastiest_quadrant();
+   most_fruitful_quadrant();
 }
 
 // this is the main function called by the game server
@@ -47,7 +47,10 @@ function make_move() {
    }
 
    // if RIGHT NEXT to a fruit, get it
-   if (my_x + 1 < board_width && board[my_x + 1][my_y] > 0) {
+   if (my_y - 1 >= 0 && board[my_x][my_y - 1] > 0) {
+      trace("ERMAHGERD to the North!");
+      return NORTH;
+   }   if (my_x + 1 < board_width && board[my_x + 1][my_y] > 0) {
       trace("ERMAHGERD to the East!");
       return EAST;
    }
@@ -59,10 +62,7 @@ function make_move() {
       trace("ERMAHGERD to the South!");
       return SOUTH;
    }
-   if (my_y - 1 >= 0 && board[my_x][my_y - 1] > 0) {
-      trace("ERMAHGERD to the North!");
-      return NORTH;
-   }
+
 
    // otherwise, we're on a mission... of randomness
    if (target_still_exists()){
@@ -107,7 +107,7 @@ function target_still_exists() {
 }
 
 // split the board into 4ths, figure out which has the most fruit
-function id_tastiest_quadrant() {
+function most_fruitful_quadrant() {
    var board = get_board();
    var NW = 0;
    var NE = 0;
