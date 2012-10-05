@@ -32,6 +32,17 @@ function new_game() {
       }
    };
 
+   // scan the board for the rare fruit
+   for (var x = 0; x < board_width; x++){
+      for (var y = 0; y < board_height; y++){
+         if (board[x][y] === rare_fruit){
+            target = [x,y];
+            trace("My target is " + target);
+            break;
+         }
+      }
+   }
+
    most_fruitful_quadrant();
 }
 
@@ -43,6 +54,7 @@ function make_move() {
 
    // we found an item! take it!
    if (board[my_x][my_y] > 0) {
+      trace("Oooh, it's " + board[my_x][my_y])
       return TAKE;
    }
 
@@ -138,7 +150,7 @@ function most_fruitful_quadrant() {
 // certain board number/layout. This is useful for repeatedly testing your
 // bot(s) against known positions.
 //
-function default_board_number() {
-   return 445381; // this is a fun, fruit-dense lvl
-}
+//function default_board_number() {
+//   return 445381; // this is a fun, fruit-dense lvl
+//}
 
