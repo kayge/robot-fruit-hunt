@@ -32,7 +32,8 @@ function new_game() {
       }
    };
 
-   // scan the board for the rare fruit
+   // scan the board for the rare fruit(s?)
+   // todo : probably shouldn't assume there is only one
    for (var x = 0; x < board_width; x++){
       for (var y = 0; y < board_height; y++){
          if (board[x][y] === rare_fruit){
@@ -77,45 +78,72 @@ function make_move() {
 
 
    // otherwise, we're on a mission... of randomness
-   if (target_still_exists()){
-      return move_toward_target();
+   if (target_still_exists(target)){
+      return move_toward_target(target);
    }
    else {
-      get_new_target();
-      return move_toward_target();
+      target = get_new_target();
+      return move_toward_target(target);
    }
 }
 
 // move in the direction of your target, but always be on the lookout for items
 // in your path (that can be reached without adding extra moves)
-function move_toward_target() {
+function move_toward_target(target_coords) {
+   var board = get_board();
+   var my_x = get_my_x();
+   var my_y = get_my_y();
 
-   var rand = Math.random() * 4;
+   // target_coords has [x,y]
+   if (my_x < target_coords[0]) {return EAST}
+   else if (my_x > target_coords[0]) {return WEST}
+   else if (my_y > target_coords[1]) {return NORTH}
+   else if (my_y < target_coords[1]) {return SOUTH}
 
-   if (rand < 1) { 
-      trace("heading north, boss");
-      return NORTH;
-   }
-   if (rand < 2) {
-      trace("heading south, boss");
-      return SOUTH;
-   }
-   if (rand < 3) {
-      trace("heading east, boss");
-      return EAST;
-   }
-   else {
-      trace("heading west, boss");
-      return WEST;
-   }
+
+   // good ol' random bot
+   // var rand = Math.random() * 4;
+
+   // if (rand < 1) { 
+   //    trace("heading north, boss");
+   //    return NORTH;
+   // }
+   // if (rand < 2) {
+   //    trace("heading south, boss");
+   //    return SOUTH;
+   // }
+   // if (rand < 3) {
+   //    trace("heading east, boss");
+   //    return EAST;
+   // }
+   // else {
+   //    trace("heading west, boss");
+   //    return WEST;
+   // }
 }
 
+// This should eventually get the next fruit on the
+// rare fruit list (if still worthwhile, and if still exists)
 function get_new_target() {
 
+   new_target = [0,0];
+
+   trace("My target is now " + new_target);
+
+   return new_target;
 }
 
-function target_still_exists() {
-   return true;
+function target_still_exists(target_coords) {
+   var board = get_board();
+
+   trace(target_coords);
+
+   if (board[target_coords[0]][target_coords[1]] > 0) {   
+      return true;
+   }
+
+   else {return false;}
+
 }
 
 // split the board into 4ths, figure out which has the most fruit
@@ -139,7 +167,6 @@ function most_fruitful_quadrant() {
          }
       };            
    };   
-
    trace("NW has " + NW);
    trace("NE has " + NE);
    trace("SW has " + SW);
