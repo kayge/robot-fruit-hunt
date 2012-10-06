@@ -27,10 +27,36 @@ function new_game() {
    for (var i = 1; i < fruit_counts.length; i++) {
       fruit_counts[i] = get_total_item_count(i);
 
-      if (fruit_counts[i] < rare_fruit || rare_fruit === 0){
+      if ((fruit_counts[i] > 0 && fruit_counts[i] < rare_fruit) || rare_fruit === 0){
          rare_fruit = i;
       }
    };
+
+
+   find_rare_fruit();
+
+   most_fruitful_quadrant();
+}
+
+function find_rare_fruit(){
+   var board = get_board();
+
+   // reset the rare
+   rare_fruit = 0;
+
+   board_height = HEIGHT;
+   board_width = WIDTH;
+
+   update_fruit_counts();
+
+   for (var i = 1; i < fruit_counts.length; i++) {
+      if ((fruit_counts[i] > 0 && fruit_counts[i] < rare_fruit) || rare_fruit === 0){
+         rare_fruit = i;
+      }
+   };
+
+   trace("The rarest fruit is " + rare_fruit);
+   trace(fruit_counts);
 
    // scan the board for the rare fruit(s?)
    // todo : probably shouldn't assume there is only one
@@ -43,8 +69,13 @@ function new_game() {
          }
       }
    }
+}
 
-   most_fruitful_quadrant();
+// go thru and check to see if bots have taken fruit
+function update_fruit_counts() {
+   for (var i = 1; i < fruit_counts.length; i++) {
+      fruit_counts[i] = get_total_item_count(i)-(get_my_item_count(i)+get_opponent_item_count(i));
+   };
 }
 
 // this is the main function called by the game server
@@ -82,7 +113,9 @@ function make_move() {
       return move_toward_target(target);
    }
    else {
-      target = get_new_target();
+      //target = get_new_target();
+      trace("Getting a new target...");
+      find_rare_fruit();
       return move_toward_target(target);
    }
 }
@@ -126,11 +159,14 @@ function move_toward_target(target_coords) {
 // rare fruit list (if still worthwhile, and if still exists)
 function get_new_target() {
 
-   new_target = [0,0];
+   //new_target = find_rare_fruit();
 
-   trace("My target is now " + new_target);
+   find_rare_fruit();
 
-   return new_target;
+   //trace("My target is now " + new_target);
+   trace("My target is now " + target);
+
+   //return new_target;
 }
 
 function target_still_exists(target_coords) {
@@ -139,6 +175,7 @@ function target_still_exists(target_coords) {
    trace(target_coords);
 
    if (board[target_coords[0]][target_coords[1]] > 0) {   
+      trace("Target still exists");
       return true;
    }
 
@@ -177,7 +214,7 @@ function most_fruitful_quadrant() {
 // certain board number/layout. This is useful for repeatedly testing your
 // bot(s) against known positions.
 //
-//function default_board_number() {
-//   return 445381; // this is a fun, fruit-dense lvl
-//}
+function default_board_number() {
+   return 445381; // this is a fun, fruit-dense lvl
+}
 
