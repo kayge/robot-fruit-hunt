@@ -6,6 +6,9 @@ var types_of_fruit;
 var fruit_counts;
 var rare_fruit = 0;
 
+// use this as a 'reset' value for rare_fruit
+var total_fruit = 0;
+
 // current goal
 var target = [-1,-1];
 
@@ -25,24 +28,28 @@ function new_game() {
    fruit_counts = new Array(types_of_fruit+1);
 
    for (var i = 1; i < fruit_counts.length; i++) {
-      fruit_counts[i] = get_total_item_count(i);
+      var item_count = get_total_item_count(i);
+      fruit_counts[i] = item_count;
+      total_fruit += item_count;
 
       if ((fruit_counts[i] > 0 && fruit_counts[i] < rare_fruit) || rare_fruit === 0){
          rare_fruit = i;
       }
    };
 
-
+   trace("Total fruit: " + total_fruit);
    find_rare_fruit();
 
    most_fruitful_quadrant();
 }
 
+// hmm, rare fruit isn't just lowest count...
 function find_rare_fruit(){
    var board = get_board();
 
-   // reset the rare
-   rare_fruit = 0;
+   // reset the rare to a high number, without making assumptions
+   // e.g. they could just make a board with 10000 bananas
+   rare_fruit = total_fruit;
 
    board_height = HEIGHT;
    board_width = WIDTH;
@@ -50,8 +57,8 @@ function find_rare_fruit(){
    update_fruit_counts();
 
    for (var i = 1; i < fruit_counts.length; i++) {
-      if ((fruit_counts[i] > 0 && fruit_counts[i] < rare_fruit) || rare_fruit === 0){
-         rare_fruit = i;
+      if (is_still_worthwhile(i) && fruit_counts[i] > 0 && fruit_counts[i] < rare_fruit){
+         rare_fruit = i;         
       }
    };
 
@@ -62,7 +69,7 @@ function find_rare_fruit(){
    // todo : probably shouldn't assume there is only one
    for (var x = 0; x < board_width; x++){
       for (var y = 0; y < board_height; y++){
-         if (board[x][y] === rare_fruit){
+         if (board[x][y] === rare_fruit && is_still_worthwhile(board[x][y])){
             target = [x,y];
             trace("My target is " + target);
             break;
@@ -85,31 +92,32 @@ function make_move() {
    var my_y = get_my_y();
 
    // we found an item! take it!
-   if (board[my_x][my_y] > 0) {
+   if (board[my_x][my_y] > 0 && is_still_worthwhile(board[my_x][my_y])) {
       trace("Oooh, it's " + board[my_x][my_y])
       return TAKE;
    }
 
-   // if RIGHT NEXT to a fruit, get it
-   if (my_y - 1 >= 0 && board[my_x][my_y - 1] > 0) {
+   // if RIGHT NEXT to a fruit, and it's worthwhile, get it
+   if (my_y - 1 >= 0 && board[my_x][my_y - 1] > 0 && is_still_worthwhile(board[my_x][my_y - 1])) {
       trace("ERMAHGERD to the North!");
       return NORTH;
-   }   if (my_x + 1 < board_width && board[my_x + 1][my_y] > 0) {
+   }   
+   if (my_x + 1 < board_width && board[my_x + 1][my_y] > 0 && is_still_worthwhile(board[my_x + 1][my_y])) {
       trace("ERMAHGERD to the East!");
       return EAST;
    }
-   if (my_x - 1 >= 0 && board[my_x - 1][my_y] > 0) {
+   if (my_x - 1 >= 0 && board[my_x - 1][my_y] > 0 && is_still_worthwhile(board[my_x - 1][my_y])) {
       trace("ERMAHGERD to the West!");
       return WEST;
    }
-   if (my_y + 1 < board_height && board[my_x][my_y + 1] > 0) {
+   if (my_y + 1 < board_height && board[my_x][my_y + 1] > 0  && is_still_worthwhile(board[my_x][my_y + 1])) {
       trace("ERMAHGERD to the South!");
       return SOUTH;
    }
 
 
-   // otherwise, we're on a mission... of randomness
-   if (target_still_exists(target)){
+   // otherwise, we're on a mission... 
+   if (target_still_exists(target) && is_still_worthwhile(board[target[0]][target[1]])){
       return move_toward_target(target);
    }
    else {
@@ -183,6 +191,33 @@ function target_still_exists(target_coords) {
 
 }
 
+// if someone has more than half of a fruit type, it
+// is no longer worthwhile
+function is_still_worthwhile(fruit_type) {
+   var winning_amt = Math.floor(get_total_item_count(fruit_type)/2) + 1;
+   var opp_amt = get_opponent_item_count(fruit_type);
+   var my_amt = get_my_item_count(fruit_type);
+
+   // trace("Is " + fruit_type + " still worthwhile?");
+   // trace("I have " + my_amt + " and s/he has " + opp_amt);
+   // trace("The winning amount is " + winning_amt);
+
+   if (my_amt >= winning_amt) {
+      return false;
+   }
+   if (opp_amt >= winning_amt) {
+      return false;
+   }
+
+   // I guess this is kind of a special case, if there was only
+   // 1 and we each took .5   
+   if (opp_amt + my_amt === winning_amt) {
+      return false;
+   }
+
+   return true;
+}
+
 // split the board into 4ths, figure out which has the most fruit
 function most_fruitful_quadrant() {
    var board = get_board();
@@ -214,7 +249,7 @@ function most_fruitful_quadrant() {
 // certain board number/layout. This is useful for repeatedly testing your
 // bot(s) against known positions.
 //
-function default_board_number() {
-   return 445381; // this is a fun, fruit-dense lvl
-}
+// function default_board_number() {
+//    return 445381; // this is a fun, fruit-dense lvl
+// }
 
