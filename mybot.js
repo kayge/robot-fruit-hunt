@@ -16,6 +16,10 @@ var target_dist;
 // highest priority targets
 var hitlist = [];
 
+// ignore everything else, just get to the target and pick it up
+// use for category-winning situations (i.e. when only 1 of a fruit exists)
+var sprintMode;
+
 // called at the beginning of a new game, probably a decent place to get 
 // one-time info e.g. board size, fruit rarity/placement, etc
 function new_game() {
@@ -37,10 +41,20 @@ function new_game() {
       }
    };
 
+   sprintMode = true;
+
    // get initial target
    find_rare_fruit();
 
+   var d_to_t = distance_to_target(target[0],target[1]);
+
+   // cancel sprintMode if too deep
+   if (d_to_t > board_width || d_to_t > board_height) {
+      sprintMode = false;
+   }
+
    //most_fruitful_quadrant();
+   //trace("x: " + board_width + " y: " + board_height + " d: " + distance_to_target(target[0],target[1]));
 }
 
 // find the rarest & closest fruit that is still worthwhile
@@ -93,6 +107,16 @@ function make_move() {
    var my_x = get_my_x();
    var my_y = get_my_y();
 
+   // check for sprintMode first
+   if (sprintMode === true && target_still_exists(target) && is_still_worthwhile(board[my_x][my_y])) {
+      if (my_x === target[0] && my_y === target[1]){
+         return TAKE;
+      }
+      else {
+         return move_toward_target(target);
+      }
+   }
+
    // we found an item! take it!
    if (board[my_x][my_y] > 0 && is_still_worthwhile(board[my_x][my_y])) {
       return TAKE;
@@ -139,6 +163,7 @@ function move_toward_target(target_coords) {
 // This should eventually get the next fruit on the
 // rare fruit list (if still worthwhile, and if still exists)
 function get_new_target() {
+   sprintMode = false;
    find_rare_fruit();
 }
 
@@ -203,6 +228,7 @@ function most_fruitful_quadrant() {
       };            
    };   
 }
+
 
 // Optionally include this function if you'd like to always reset to a 
 // certain board number/layout. This is useful for repeatedly testing your
