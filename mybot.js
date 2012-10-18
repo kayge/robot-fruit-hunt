@@ -123,6 +123,30 @@ function make_move() {
    }
 
    // if RIGHT NEXT to a fruit, and it's worthwhile, get it
+   var nearby_fruit;
+   nearby_fruit = check_nearby();
+
+   if(typeof(nearby_fruit) != 'undefined'){
+      return nearby_fruit;
+   }
+
+   // otherwise, we're on a mission... 
+   if (target_still_exists(target) && is_still_worthwhile(board[target[0]][target[1]])){
+      return move_toward_target(target);
+   }
+   else {
+      get_new_target();
+      return move_toward_target(target);
+   }
+}
+
+// check to see if we're right next to a fruit. If next to more than one, move toward
+// the most worthwhile one first
+function check_nearby(){   
+   var board = get_board();
+   var my_x = get_my_x();
+   var my_y = get_my_y();
+
    if (my_y - 1 >= 0 && board[my_x][my_y - 1] > 0 && is_still_worthwhile(board[my_x][my_y - 1])) {
       return NORTH;
    }   
@@ -134,15 +158,6 @@ function make_move() {
    }
    if (my_y + 1 < board_height && board[my_x][my_y + 1] > 0  && is_still_worthwhile(board[my_x][my_y + 1])) {
       return SOUTH;
-   }
-
-   // otherwise, we're on a mission... 
-   if (target_still_exists(target) && is_still_worthwhile(board[target[0]][target[1]])){
-      return move_toward_target(target);
-   }
-   else {
-      get_new_target();
-      return move_toward_target(target);
    }
 }
 
